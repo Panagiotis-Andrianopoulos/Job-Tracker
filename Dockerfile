@@ -1,0 +1,21 @@
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+COPY pyproject.toml uv.lock ./
+RUN uv sync --no-dev --frozen
+
+COPY src/ ./src/
+COPY ui/ ./ui/
+COPY configs/ ./configs/
+
+ENV PATH="/app/.venv/bin:$PATH"
+
+EXPOSE 8000 8501
+
+CMD ["uvicorn", "job_tracker.api.app:app", "--host", "0.0.0.0", "--port", "8000"]
